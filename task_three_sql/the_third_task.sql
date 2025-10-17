@@ -1,62 +1,62 @@
 /* Task 1: Output the number of movies in each category, sorted descending */
 
-select
+SELECT
 	c.name,
 	COUNT(f.film_id) as films_amount
-from
+FROM
 	film f
-join 
+JOIN 
 	film_category fc 
-on	
+ON	
 	fc.film_id = f.film_id 
-join
+JOIN
 	category c
-on
+ON
 	c.category_id  = fc.category_id
-group by 	
+GROUP BY 	
 	c.name
-order by
+ORDER BY
 	films_amount desc; 
 
-/* Task 2: Output the 10 actors whose movies rented the most money was spent */
+/* Task 2: Output the 10 actors whose movies rented the most mONey was spent */
 
-select
+SELECT
 	a.actor_id,
 	a.last_name,
 	a.first_name,
 	count(r.rental_id),
-	rank() over(order by count(r.rental_id) desc) rnk
-from 	
+	rank() over(ORDER BY count(r.rental_id) desc) rnk
+FROM 	
 	actor a
-join
+JOIN
 	film_actor fa
-on
+ON
 	fa.actor_id = a.actor_id
-join
+JOIN
 	film f
-on	
+ON	
 	fa.film_id = f.film_id
-join	
+JOIN	
 	inventory i
-on
+ON
 	i.film_id = f.film_id
-join
+JOIN
 	rental r
-on
+ON
 	r.inventory_id = i.inventory_id
-group by
+GROUP BY
 	a.actor_id,
 	a.last_name,
 	a.first_name
 LIMIT
     10;
 
-/* Task 3: Output the category of movies on which the most money was spent */
+/* Task 3: Output the category of movies ON which the most mONey was spent */
 
 SELECT
 	c.name,
 	sum(p.amount) as amount,
-	rank() over(order by sum(p.amount) desc) rnk
+	rank() over(ORDER BY sum(p.amount) desc) rnk
 FROM
 	category c
 JOIN
@@ -80,7 +80,7 @@ GROUP BY
 LIMIT
 	1;
 
-/* Task 4: Print the names of movies that are not in the inventory. Write a query without using the IN operator. */
+/* Task 4: Print the names of movies that are not in the inventory. Write a query WITHout using the IN operator. */
 
 /* Query, using IN  */
 SELECT
@@ -90,13 +90,15 @@ FROM
 	film f
 WHERE
 	f.film_id  NOT IN (
-		SELECT
+	
+    SELECT
 			i.film_id
 		FROM
+    
 			inventory i 
 	);
 
-/* Query without using IN */
+/* Query WITHout using IN */
 SELECT
     f.film_id,
 	f.title
@@ -116,13 +118,15 @@ ORDER BY
  * If several actors have the same number of movies, output all of them.
  */
 
-with actor_film_count as (
-	SELECT
+WITH actor_film_count AS (
+
+SELECT
 		a.first_name,
 		a.last_name,
-		count(*) as amount,
+		count(*) AS amount,
 		RANK() OVER(ORDER BY COUNT(*) desc) rnk
 	FROM
+
 		actor a 
 	JOIN
 		film_actor fa 
@@ -151,14 +155,14 @@ WHERE
 	afc.rnk <= 3;
 
 /* 
- * Task 6: Output cities with the number of active and inactive customers (active - customer.active = 1). 
+ * Task 6: Output cities WITH the number of active and inactive customers (active - customer.active = 1). 
  * Sort by the number of inactive customers in descending order. 
  */
 
 SELECT
 	ct.city,
-	count(CASE WHEN c.active = 1 then 1 end) as active_costumers,
-	count(CASE WHEN c.active = 0 then 0 end) as inactive_costunersalter 
+	count(CasE WHEN c.active = 1 then 1 end) AS active_costumers,
+	count(CasE WHEN c.active = 0 then 0 end) AS inactive_costunersalter 
 FROM
 	city ct
 JOIN
@@ -176,7 +180,7 @@ ORDER BY
 
 /* Task 7: Output the category of movies that have the highest number of total 
  * rental hours in the city (customer.address_id in this city) and that start 
- * with the letter “a”. Do the same for cities that have a “-” in them. Write everything in one query.
+ * WITH the letter “a”. Do the same for cities that have a “-” in them. Write everything in ONe query.
 */
 
 /*
@@ -189,11 +193,18 @@ SELECT
 	category_name,
 	hours_spent
 FROM
-	(SELECT
-		ci.city as city_name,
-		ca.name as category_name,
-		ROUND((SUM(EXTRACT(HOUR FROM (r.return_date - r.rental_date)) + EXTRACT(DAY FROM (r.return_date - r.rental_date) * 24) + EXTRACT(MINUTE FROM (r.return_date - r.rental_date)) / 60)), 2) AS hours_spent,
-		RANK() OVER(PARTITION BY ci.city ORDER BY SUM(EXTRACT(HOUR FROM (r.return_date - r.rental_date)) + EXTRACT(DAY FROM (r.return_date - r.rental_date) * 24) + EXTRACT(MINUTE FROM (r.return_date - r.rental_date)) / 60) DESC) AS rnk
+	
+    SELECT
+		ci.city AS city_name,
+		ca.name AS category_name,
+		ROUND((SUM(EXTRACT(HOUR FROM
+     (r.return_date - r.rental_date)) + EXTRACT(DAY FROM
+     (r.return_date - r.rental_date) * 24) + EXTRACT(MINUTE FROM
+     (r.return_date - r.rental_date)) / 60)), 2) AS hours_spent,
+		RANK() OVER(PARTITION BY ci.city ORDER BY SUM(EXTRACT(HOUR FROM
+     (r.return_date - r.rental_date)) + EXTRACT(DAY FROM
+     (r.return_date - r.rental_date) * 24) + EXTRACT(MINUTE FROM
+     (r.return_date - r.rental_date)) / 60) DESC) AS rnk
 	FROM
 		rental r
 	JOIN
@@ -230,11 +241,11 @@ FROM
 		ci.city,
 		ca.name
 	)	
-where 
+WHERE 
 	rnk = 1;
 
 /*
- * The second one is more effective
+ * The secONd ONe is more effective
  * Using EPOCH instead of calculating hours by extracting days, hours and minutes
  * This way is more accurate
 */
@@ -244,12 +255,16 @@ SELECT
 	category_name,
 	hours_spent
 FROM
-	(SELECT
-		ci.city as city_name,
-		ca.name as category_name,
-		round(sum(extract(epoch from (r.return_date - r.rental_date))/3600), 2) as hours_spent,
-		rank() over(partition by ci.city order by sum(extract(epoch from (r.return_date - r.rental_date))/3600) desc) as rnk
+	(
+    SELECT
+		ci.city AS city_name,
+		ca.name AS category_name,
+		round(sum(extract(epoch FROM
+     (r.return_date - r.rental_date))/3600), 2) AS hours_spent,
+		rank() over(partitiON by ci.city ORDER BY sum(extract(epoch FROM
+     (r.return_date - r.rental_date))/3600) desc) AS rnk
 	FROM
+
 		rental r
 	JOIN
 		customer c
@@ -285,5 +300,5 @@ FROM
 		ci.city,
 		ca.name
 	)	
-where 
-	rnk = 1;
+    WHERE 
+	    rnk = 1;
