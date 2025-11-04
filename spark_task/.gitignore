@@ -1,0 +1,29 @@
+# 1. ВИРТУАЛЬНОЕ ОКРУЖЕНИЕ (VIRTUAL ENVIRONMENTS)
+.venv/
+venv/
+env/
+*.egg-info/
+
+# 2. APACHE SPARK & HADOOP FILES
+/spark-*.*
+/hadoop-*.*
+spark-events/
+logs/
+temp/
+tmp/
+*.jar             # Исключаем JDBC драйверы (postgresql-*.jar)
+.spark_history/
+
+# 3. PYTHON / PIP CACHE
+__pycache__/
+*.pyc
+*.pyd
+*.so
+.mypy_cache/
+.pytest_cache/
+
+# 4. JUPYTER / VS CODE NOTEBOOKS
+.ipynb_checkpoints
+*~.ipynb
+.vscode/
+.vscode-test/
