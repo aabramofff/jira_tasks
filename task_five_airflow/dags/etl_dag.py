@@ -12,13 +12,23 @@ from airflow.providers.standard.operators.python import PythonOperator
 from airflow.datasets import Dataset
 
 
+# This variable make us available to trigger mongo_loader_dag
 PROCESSED_DATA_DATASET = Dataset("file://airflow/processed_data_ready")
+
+# This variable contains information about the initial data file 
 INTERNAL_DATA_PATH = "/opt/airflow/data_in/tiktok_google_play_reviews.csv"
+
+# This variable contains path to final output file
 PROCESSED_DATA_PATH = "/opt/airflow/data_in/processed_data.csv"
+
+# This is the path where temporary files that are created and stored during the operation of the dag will be stored.
 TEMP_DIR = "/opt/airflow/data_in/temp"
 
 
 def get_temp_path(filename):
+    """ 
+        A function that creates or updates a file
+    """
     if not os.path.exists(TEMP_DIR):
         os.makedirs(TEMP_DIR)
     return os.path.join(TEMP_DIR, filename)
@@ -26,6 +36,9 @@ def get_temp_path(filename):
 
 @task.branch(task_id="check_file_empty")
 def is_empty_file(filepath: str):
+    """
+        Checking for the contents of the data file
+    """
     try:
         df_head = pd.read_csv(filepath, nrows=1)
 
@@ -43,6 +56,9 @@ def is_empty_file(filepath: str):
 
 @task(task_id="read_data_task")
 def read_data(filepath: str):
+    """
+        Task that reads the data from initial data file
+    """
     df = pd.read_csv(filepath)
     print(f"Прочитано строк: {len(df)}")
 
@@ -52,7 +68,10 @@ def read_data(filepath: str):
 
 
 @task(task_id="replace_null_task")
-def replace_null(input_path: str):    
+def replace_null(input_path: str):
+    """
+        Task that replaces NaN values
+    """    
     df = pd.read_csv(input_path)
 
     df = df.fillna("-")
@@ -65,6 +84,9 @@ def replace_null(input_path: str):
 
 @task(task_id="sort_data_task")
 def sort_data(input_path: str):
+    """
+        Task that sorts data with replaced NaN values
+    """
     df = pd.read_csv(input_path)
     
     if 'at' in df.columns:
@@ -82,6 +104,9 @@ def sort_data(input_path: str):
 
 @task(task_id="clean_content_task")
 def clean_content(input_path: str):
+    """
+        This task cleans "content" column
+    """
     df = pd.read_csv(input_path)
     
     if 'content' in df.columns:
@@ -97,6 +122,9 @@ def clean_content(input_path: str):
 
 @task(task_id="save_to_csv_file_task")
 def save_to_csv_file(input_path: str, final_output_path: str):
+    """
+        Saves processed data into .csv file
+    """
     if os.path.exists(input_path):
         os.rename(input_path, final_output_path)
         print("Обработанные данные сохранены!\nПолный путь:", final_output_path)
@@ -106,9 +134,13 @@ def save_to_csv_file(input_path: str, final_output_path: str):
 
 @task(task_id="publish_data_task", outlets=[PROCESSED_DATA_DATASET])
 def publish_data():
+    """
+        Success task's execution means that all dag ended uo successfuly
+    """
     print("Данные сохранены. Dataset опубликован для запуска загрузчика.")
 
 
+# in this section, the dag is launched and all dependencies are registered.
 with DAG(
     dag_id="etl_dag",
     start_date=datetime(2025, 1, 1),

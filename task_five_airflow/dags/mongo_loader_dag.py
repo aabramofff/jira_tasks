@@ -4,7 +4,9 @@ from airflow.datasets import Dataset
 from pendulum import datetime
 
 
+# The same variable as in etl_dag is used for the dag trigger
 PROCESSED_DATA_DATASET = Dataset("file://airflow/processed_data_ready")
+# This variable stores the path to the processed files to connect it to mongodb.
 PROCESSED_DATA_PATH = "/opt/airflow/data_in/processed_data.csv"
 
 
@@ -18,6 +20,9 @@ with DAG(
     
     @task(task_id="load_to_mongo_task")
     def load_to_mongo(input_path: str):
+        """
+            Task that loads data into MongoDB
+        """
         import pandas as pd      
         from pymongo import MongoClient
         
