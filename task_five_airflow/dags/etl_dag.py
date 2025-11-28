@@ -110,7 +110,7 @@ def clean_content(input_path: str):
     df = pd.read_csv(input_path)
     
     if 'content' in df.columns:
-        df['content'] = df['content'].astype(str).apply(lambda x: re.sub(r'[^\w\s\.,!\?]', '', x))
+        df['content'] = df['content'].astype(str).apply(lambda x: re.sub(r'[^\w\s\.,!\?]', '-', x))
         print('Столбец "content" успешно очищен!')
     else:
         print('Столбец "content" не найден. Очистка не выполняется!')
