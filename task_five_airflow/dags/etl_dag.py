@@ -43,14 +43,14 @@ def is_empty_file(filepath: str):
         df_head = pd.read_csv(filepath, nrows=1)
 
         if df_head.empty:
-            print("Файл с данными пуст!")
+            print("File with data is empty!")
             return "file_empty_log"
 
-        print(f"Прочитано строк: {len(df_head)}. Начинается обработка...")
+        print(f"Lines read: {len(df_head)}. Processing begins...")
         return "data_processing_group.read_data_task"
 
     except Exception as e:
-        print("Ошибка при чтении файла:\n", e)
+        print("Error ocurred while reading the file:\n", e)
         return "file_empty_log"
 
 
@@ -60,7 +60,7 @@ def read_data(filepath: str):
         Task that reads the data from initial data file
     """
     df = pd.read_csv(filepath)
-    print(f"Прочитано строк: {len(df)}")
+    print(f"Lines read: {len(df)}")
 
     output_path = get_temp_path("step1_read.csv")
     df.to_csv(output_path, index=False)
@@ -78,7 +78,7 @@ def replace_null(input_path: str):
 
     output_path = get_temp_path("step2_nulls.csv")
     df.to_csv(output_path, index=False)
-    print('NULL-значения в заменены на "-".')
+    print('NULL-values replaced with "-".')
     return output_path
 
 
@@ -93,9 +93,9 @@ def sort_data(input_path: str):
         df['at'] = pd.to_datetime(df['at'], errors='coerce')
         
         df = df.sort_values(by='at', ascending=False)
-        print('Данные отсортированы по "at" (по убыванию)')
+        print('The data is sorted by "at" (descending)')
     else:
-        print('Столбец "at" не найден. Сортировка не выполняется!')
+        print('The "at" column was not found. Sorting is not performed!')
     
     output_path = get_temp_path("step3_sorted.csv")
     df.to_csv(output_path, index=False)
@@ -114,9 +114,9 @@ def clean_content(input_path: str):
         df['content'] = df['content'].str.strip() 
         df['content'] = df['content'].replace('', '-', regex=False)
 
-        print('Столбец "content" успешно очищен!')
+        print('The "content" column has been successfully cleared!')
     else:
-        print('Столбец "content" не найден. Очистка не выполняется!')
+        print('The "content" column was not found. Cleaning is not performed!')
         
     output_path = get_temp_path("step4_cleaned.csv")
     df.to_csv(output_path, index=False)
@@ -130,9 +130,9 @@ def save_to_csv_file(input_path: str, final_output_path: str):
     """
     if os.path.exists(input_path):
         os.rename(input_path, final_output_path)
-        print("Обработанные данные сохранены!\nПолный путь:", final_output_path)
+        print("The processed data is saved!\nFull path:", final_output_path)
     else:
-        raise FileNotFoundError(f"Финальный файл не найден: {input_path}")
+        raise FileNotFoundError(f"File not found: {input_path}")
     
 
 @task(task_id="publish_data_task", outlets=[PROCESSED_DATA_DATASET])
@@ -140,7 +140,7 @@ def publish_data():
     """
         Success task's execution means that all dag ended uo successfuly
     """
-    print("Данные сохранены. Dataset опубликован для запуска загрузчика.")
+    print("The data is saved. The Dataset is published to run the loader.")
 
 
 # in this section, the dag is launched and all dependencies are registered.
@@ -163,7 +163,7 @@ with DAG(
     check_branch = is_empty_file(filepath=INTERNAL_DATA_PATH)
     file_empty_log = PythonOperator(
         task_id="file_empty_log",
-        python_callable=lambda: print("Файл пуст! Логгирование факта и завершение работы...")
+        python_callable=lambda: print("The file is empty! Logging the fact and shutting down the work...")
     )
 
     with TaskGroup("data_processing_group") as processing_group:
