@@ -76,7 +76,7 @@ x-airflow-common:
     AIRFLOW__SCHEDULER__ENABLE_HEALTH_CHECK: 'true'
     # WARNING: Use _PIP_ADDITIONAL_REQUIREMENTS option ONLY for a quick checks
     # for other purpose (development, test and especially production usage) build/extend Airflow image.
-    _PIP_ADDITIONAL_REQUIREMENTS: 'apache-airflow-providers-mongo~=3.4.0 pandas pymongo apache-airflow-providers-standard'
+    _PIP_ADDITIONAL_REQUIREMENTS: 'apache-airflow-providers-mongo~=3.4.0 pandas pymongo apache-airflow-providers-standard' # All required dependencies
     # The following line can be used to set a custom config file, stored in the local config folder
     AIRFLOW_CONFIG: '/opt/airflow/config/airflow.cfg'
   volumes:
@@ -98,7 +98,7 @@ services:
     image: mongo:latest
     container_name: mongodb
     ports:
-      - "27017:27017" # Открываем порт для MongoDB Compass
+      - "27017:27017" 
     environment:
       - MONGO_INITDB_DATABASE=airflow_mongodb
     volumes:
@@ -174,11 +174,11 @@ services:
       <<: *airflow-common-depends-on
       airflow-init:
         condition: service_completed_successfully
-      mongodb: # ДОБАВЛЕНО: Зависимость от MongoDB
+      mongodb: # MondoDB dependency added
         condition: service_healthy
     environment:
       <<: *airflow-common-env
-      _PIP_ADDITIONAL_REQUIREMENTS: 'apache-airflow-providers-mongo~=3.4.0 pandas pymongo apache-airflow-providers-standard'
+      _PIP_ADDITIONAL_REQUIREMENTS: 'apache-airflow-providers-mongo~=3.4.0 pandas pymongo apache-airflow-providers-standard' # All required dependencies
 
   airflow-dag-processor:
     <<: *airflow-common
@@ -212,7 +212,7 @@ services:
       # Required to handle warm shutdown of the celery workers properly
       # See https://airflow.apache.org/docs/docker-stack/entrypoint.html#signal-propagation
       DUMB_INIT_SETSID: "0"
-      _PIP_ADDITIONAL_REQUIREMENTS: 'apache-airflow-providers-mongo~=3.4.0 pandas pymongo apache-airflow-providers-standard'
+      _PIP_ADDITIONAL_REQUIREMENTS: 'apache-airflow-providers-mongo~=3.4.0 pandas pymongo apache-airflow-providers-standard' # All required dependencies
     restart: always
     depends_on:
       <<: *airflow-common-depends-on
@@ -220,7 +220,7 @@ services:
         condition: service_healthy
       airflow-init:
         condition: service_completed_successfully
-      mongodb: # ДОБАВЛЕНО: Зависимость от MongoDB
+      mongodb: # MongoDB dependency added
         condition: service_healthy
     deploy:
       resources:
@@ -333,7 +333,7 @@ services:
       _AIRFLOW_WWW_USER_CREATE: 'true'
       _AIRFLOW_WWW_USER_USERNAME: ${_AIRFLOW_WWW_USER_USERNAME:-airflow}
       _AIRFLOW_WWW_USER_PASSWORD: ${_AIRFLOW_WWW_USER_PASSWORD:-airflow}
-      _PIP_ADDITIONAL_REQUIREMENTS: 'apache-airflow-providers-mongo~=3.4.0 pandas pymongo'
+      _PIP_ADDITIONAL_REQUIREMENTS: 'apache-airflow-providers-mongo~=3.4.0 pandas pymongo' # All required dependencies
     user: "0:0"
 
   airflow-cli:
