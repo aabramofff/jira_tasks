@@ -14,8 +14,6 @@ The second thing that made me think about it was the replace_null_task, as I fir
 ## 3. MongoDB
 **MongoDB** is a **document-oriented NoSQL database** designed for storing, retrieving, and managing large volumes of unstructured or semi-structured data. Before this moment I haven't got any experience with NoSQL databases, so it was my first time. And first I didn't understand anything. I worked in MongoDB Compass as the task offered, and it's interface seemed to me not really intuitive. But after a few videos on YouTube, google surfing and AI asking I understand this query writing concept. It was really interesting experience.
 
-# 4.  
-
 # Additional Content
 ## DAG photo
 ![](images/etl_dag-graph.png)
