@@ -7,7 +7,7 @@ from pendulum import datetime
 # The same variable as in etl_dag is used for the dag trigger
 PROCESSED_DATA_DATASET = Dataset("file://airflow/processed_data_ready")
 # This variable stores the path to the processed files to connect it to mongodb.
-PROCESSED_DATA_PATH = "/opt/airflow/data_in/processed_data.csv"
+PROCESSED_DATA_PATH = "/opt/airflow/output/processed_data.csv"
 
 
 with DAG(

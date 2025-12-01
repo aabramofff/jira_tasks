@@ -11,34 +11,41 @@ from airflow.providers.standard.sensors.filesystem import FileSensor
 from airflow.providers.standard.operators.python import PythonOperator
 from airflow.datasets import Dataset
 
+# The path to the input folder (where FileSensor will search for the file)
+INPUT_DIR_PATH = "/opt/airflow/input"
+
+# The path to the output folder (where all the results will be saved)
+OUTPUT_DIR_PATH = "/opt/airflow/output"
+
+# 3. The final path for the processed file
+PROCESSED_DATA_PATH = os.path.join(OUTPUT_DIR_PATH, "processed_data.csv")
+
+# The path for temporary files (saved inside the output folder)
+TEMP_DIR = os.path.join(OUTPUT_DIR_PATH, "temp")
 
 # This variable make us available to trigger mongo_loader_dag
 PROCESSED_DATA_DATASET = Dataset("file://airflow/processed_data_ready")
-
-# This variable contains information about the initial data file 
-INTERNAL_DATA_PATH = "/opt/airflow/data_in/tiktok_google_play_reviews.csv"
-
-# This variable contains path to final output file
-PROCESSED_DATA_PATH = "/opt/airflow/data_in/processed_data.csv"
-
-# This is the path where temporary files that are created and stored during the operation of the dag will be stored.
-TEMP_DIR = "/opt/airflow/data_in/temp"
-
 
 def get_temp_path(filename):
     """ 
         A function that creates or updates a file
     """
-    if not os.path.exists(TEMP_DIR):
-        os.makedirs(TEMP_DIR)
+    os.makedirs(TEMP_DIR, exist_ok=True)
     return os.path.join(TEMP_DIR, filename)
 
 
 @task.branch(task_id="check_file_empty")
-def is_empty_file(filepath: str):
+def is_empty_file(ti=None):
     """
         Checking for the contents of the data file
     """
+    # extracting the path to the found file from XCom
+    filepath = ti.xcom_pull(task_ids='get_filepath_and_push', key='return_value')
+
+    if not filepath:
+        print("Error: File path could not be retrieved from Pusher.")
+        return "file_empty_log"
+
     try:
         df_head = pd.read_csv(filepath, nrows=1)
 
@@ -51,7 +58,26 @@ def is_empty_file(filepath: str):
 
     except Exception as e:
         print("Error ocurred while reading the file:\n", e)
+        print(f"Path received: {filepath}")
         return "file_empty_log"
+    
+@task(task_id="get_filepath_and_push")
+def get_filepath_and_push():
+    """
+        Finds the actual path to the file found by the sensor and pushes it to XCom.
+    """
+    import glob
+    
+    file_pattern = os.path.join(INPUT_DIR_PATH, "*.csv")
+    
+    # Searching for a file using Python's built-in 'glob' module
+    found_files = glob.glob(file_pattern, recursive=False)
+    
+    if not found_files:
+        raise FileNotFoundError(f"FileSensor succeeded, but glob failed to find file at: {file_pattern}")
+    
+    print(f"File path found and pushed to XCom: {found_files[0]}")
+    return found_files[0]
 
 
 @task(task_id="read_data_task")
@@ -59,6 +85,9 @@ def read_data(filepath: str):
     """
         Task that reads the data from initial data file
     """
+    if not filepath:
+        raise ValueError("Could not retrieve file path from FileSensor XCom.")
+
     df = pd.read_csv(filepath)
     print(f"Lines read: {len(df)}")
 
@@ -154,13 +183,15 @@ with DAG(
 
     wait_for_data = FileSensor(
         task_id="wait_for_data",
-        filepath=INTERNAL_DATA_PATH,
+        filepath=os.path.join(INPUT_DIR_PATH, "*.csv"),
         fs_conn_id="fs_default",
         poke_interval=15,
         timeout=300
     )
 
-    check_branch = is_empty_file(filepath=INTERNAL_DATA_PATH)
+    file_path_pusher = get_filepath_and_push()
+
+    check_branch = is_empty_file()
     file_empty_log = PythonOperator(
         task_id="file_empty_log",
         python_callable=lambda: print("The file is empty! Logging the fact and shutting down the work...")
@@ -168,7 +199,7 @@ with DAG(
 
     with TaskGroup("data_processing_group") as processing_group:
         
-        read = read_data(filepath=INTERNAL_DATA_PATH)
+        read = read_data(filepath=file_path_pusher)
         replace_nulls = replace_null(input_path=read)
         sort_data_flow = sort_data(input_path=replace_nulls)
         clean_content_flow = clean_content(input_path=sort_data_flow)
@@ -180,7 +211,8 @@ with DAG(
         final_output_path=PROCESSED_DATA_PATH
     )
 
-    wait_for_data >> check_branch
+    wait_for_data >> file_path_pusher
+    file_path_pusher >> check_branch
     check_branch >> [file_empty_log, processing_group]
     processing_group >> save_result
     save_result >> publish_data()

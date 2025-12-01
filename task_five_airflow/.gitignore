@@ -22,7 +22,7 @@ env/
 
 # 4. Data 
 ######################################
-data/temp
+data_out/temp
 *.tmp
 *.csv.tmp 
 

@@ -84,7 +84,10 @@ x-airflow-common:
     - ${AIRFLOW_PROJ_DIR:-.}/logs:/opt/airflow/logs
     - ${AIRFLOW_PROJ_DIR:-.}/config:/opt/airflow/config
     - ${AIRFLOW_PROJ_DIR:-.}/plugins:/opt/airflow/plugins
-    - C:/Users/Innowise/Desktop/jira_tasks/jira_tasks/task_five_airflow/data:/opt/airflow/data_in
+    # - C:/Users/Innowise/Desktop/jira_tasks/jira_tasks/task_five_airflow/data:/opt/airflow/data_in
+    - C:/Users/Innowise/Desktop/jira_tasks/jira_tasks/task_five_airflow/data_in:/opt/airflow/input
+    - C:/Users/Innowise/Desktop/jira_tasks/jira_tasks/task_five_airflow/data_out:/opt/airflow/output
+    
   user: "${AIRFLOW_UID:-50000}:0"
   depends_on:
     &airflow-common-depends-on
