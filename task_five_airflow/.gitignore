@@ -35,3 +35,6 @@ data_out/temp
 ######################################
 .vscode/
 .idea/
+
+# 7. airflow.cfg
+config/airflow.cfg
