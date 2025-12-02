@@ -1,0 +1,40 @@
+# 1. Airflow (Generated files & DB)
+######################################
+logs/
+airflow.db
+airflow-webserver.pid
+webserver_config.pyc
+unittests.cfg
+
+# 2. Logs (Airflow, Python & systems)
+######################################
+*.log
+*.err
+*.warn
+*.pid
+
+# 3. Virtual Environment Python
+######################################
+.venv/
+venv/
+env/
+*.pyc
+
+# 4. Data 
+######################################
+data_out/temp
+*.tmp
+*.csv.tmp 
+
+# 5. Docker & Docker Compose
+######################################
+.env
+*.env
+
+# 6. IDE 
+######################################
+.vscode/
+.idea/
+
+# 7. airflow.cfg
+config/airflow.cfg
