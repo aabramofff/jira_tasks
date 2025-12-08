@@ -1,0 +1,9 @@
+# 1. Pycache
+__pycache__/
+
+# 2. Venv
+.venv/
+venv/
+
+# 3. IDEA
+.idea/
