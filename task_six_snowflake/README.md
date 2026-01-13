@@ -27,20 +27,26 @@ The project follows the **Medallion Architecture** to ensure data quality and se
 ## 📂 Project Structure
 
 ```text
-├── dags/                        # Airflow DAG definitions
-│   ├── airline_ingestion.py  # Data ingestion from CSV to Snowflake Raw
-│   └── airline_main_pipeline.py # L2/L3 Transformation orchestration
-├── data_in/                     # Local source data (Git ignored)
-│   └── airline_dataset.csv      # Raw dataset file
-├── sql/                         # Snowflake SQL Scripts
-│   ├── 01_airline_structure_creation            # Database, Schema, and Table creation
-│   ├── procedures.sql           # Main Transformation Stored Procedure
-│   ├── procedures.sql           # Main Transformation Stored Procedure
-│   ├── time_travel_tests.sql    # Time Travel DDL/DML test cases
-│   └── security_rls.sql         # RLS Policies and Secure View setup
-├── Dockerfile                   # Custom Airflow image with Snowflake provider
-├── docker-compose.yaml          # Infrastructure as Code (Airflow services)
-└── .gitignore                   # Files excluded from version control
+├── dags/                                # Airflow DAG definitions
+│   ├── airline_ingestion.py          # Data ingestion from CSV to Snowflake Raw
+│   └── airline_main_pipeline.py      # L2/L3 Transformation orchestration
+├── data_in/                             # Local source data (Git ignored)
+│   └── airline_dataset.csv              # Raw dataset file
+├── sql/                                 # Snowflake SQL Scripts
+│   ├── 01_airline_structure_creation.sql # DB and Schema setup
+│   ├── 02_airline_raw_data_tables_creation.sql # Landing zone tables
+│   ├── 03_airline_roles_and_rights.sql  # RBAC (Roles & Privileges) setup
+│   ├── 04_airline_tables_creation.sql   # DWH Layers (L2/L3) tables
+│   ├── 05_airline_main_procedure.sql    # ETL Stored Procedure logic
+│   ├── 06_airline_sequre_view.sql       # RLS and Secure View implementation
+│   └── 07_airline_dml_ddl_time_travel_queries.sql # Time Travel test cases
+├── bi_tools/                            # Visualization & Analytics
+│   ├── Snowflake Dashboards.png         # Screenshot of Snowsight analytics
+│   ├── Snowflake Streamlit Apps.png     # Screenshot of Streamlit application
+│   └── streamlit_app.py                 # Python code for native Snowflake App
+├── Dockerfile                           # Custom Airflow image with Snowflake provider
+├── docker-compose.yaml                  # Infrastructure as Code (Airflow services)
+└── .gitignore                           # Files excluded from version control
 ```
 
 ## 🚀 Key Features
@@ -69,10 +75,20 @@ The entire transformation logic is encapsulated within the `SP_TRANSFORM_AIRLINE
 ---
 
 ## 🔧 Setup & Execution
+
 1.  **Clone the Repo:** Copy this repository to your local machine.
-2.  **Infrastructure:** Run `docker-compose up -d --build` to start the Airflow environment.
-3.  **Snowflake Configuration:**
-    * Execute `sql/ddl_setup.sql` to create the environment.
-    * Create the Stored Procedure using `sql/procedures.sql`.
-4.  **Airflow Connection:** Setup a `snowflake_conn` in the Airflow UI with your credentials.
-5.  **Run Pipeline:** Unpause and trigger the DAGs in the Airflow UI.
+2.  **Infrastructure:** Run `docker-compose up -d --build` to start the Airflow environment and ensure the `data_in/` folder is mapped correctly.
+3.  **Snowflake Database Configuration:**
+    Execute the SQL scripts in the `sql/` folder sequentially to set up the environment:
+    * `01` to `02`: Set up the database structure and Raw landing tables.
+    * `03`: Configure RBAC (Roles, Users, and Permissions).
+    * `04`: Create the Integration (L2) and Analytics (L3) tables.
+    * `05`: Deploy the Main Stored Procedure for ETL transformations.
+    * `06`: Implement Security features (RLS and Secure Views).
+    * `07`: (Optional) Run Time-Travel queries to verify data recovery features.
+4.  **Airflow Connection:** * Access the Airflow UI at `localhost:8080`.
+    * Go to **Admin -> Connections** and create a connection named `snowflake_conn`.
+    * Provide your Snowflake account details, using the role created in script `03`.
+5.  **Run Pipeline:** * Unpause the DAGs in the Airflow UI.
+    * Trigger `01_airline_ingestion` first to load raw data.
+    * Trigger `02_airline_main_pipeline` to execute the full DWH transformation.
