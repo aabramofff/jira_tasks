@@ -1,0 +1,41 @@
+# --- Airflow ---
+logs/
+plugins/
+airflow.cfg
+airflow.db
+webserver_config.py
+unittests.cfg
+.env
+standalone_admin_password.txt
+
+# --- Docker ---
+.docker/
+docker-compose.override.yml
+
+# --- Python & Environment ---
+__pycache__/
+*.py[cod]
+*$py.class
+venv/
+env/
+.venv/
+.env
+
+# --- Data & Local Files ---
+# Игнорируем папку с исходными данными, так как файл может быть тяжелым
+data_in/
+*.csv
+*.parquet
+*.json
+
+# --- OS & IDE ---
+.DS_Store
+.vscode/
+.idea/
+.history/
+
+# --- Snowflake & Security ---
+# Если вы создавали файлы с ключами или конфигами
+*.pem
+*.p8
+.snowflake/
