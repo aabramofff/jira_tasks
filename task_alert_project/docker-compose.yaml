@@ -1,0 +1,30 @@
+version: '3.8'
+
+services:
+  redis:
+    image: redis:alpine
+    ports: 
+      - "16379:6379"
+
+  processor:
+    build: .
+    command: python -m src.processor
+    depends_on:
+      - redis
+    environment:
+      - REDIS_HOST=redis
+    volumes:
+      - ./data:/app/data
+      - ./logs:/app/logs
+  
+  loader:
+    build: .
+    command: python -m src.loader
+    depends_on:
+      - redis
+      - processor
+    environment:
+      - REDIS_HOST=redis
+    volumes:
+      - ./data:/app/data
+      - ./logs:/app/logs
