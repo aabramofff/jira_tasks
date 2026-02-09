@@ -1,0 +1,75 @@
+# --- Python ---
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# --- Virtual Environment ---
+venv/
+env/
+ENV/
+.venv/
+
+# --- Environment Variables (Secrets) ---
+.env
+.env.local
+
+# --- IDE Settings ---
+.idea/
+.vscode/
+*.swp
+*.swo
+.DS_Store
+
+# --- Project Data (Important!) ---
+# Ignore raw large datasets and processed results
+data/raw/*
+data/processed/*
+data/*.csv
+data/*.parquet
+
+# Keep the folder structure (optional, if you want folders to exist in git)
+!data/raw/.gitkeep
+!data/processed/.gitkeep
+
+# --- Apache Spark ---
+metastore_db/
+derby.log
+spark-warehouse/
+checkpoint/
+
+# --- Apache Airflow ---
+airflow.db
+airflow.cfg
+unittests.cfg
+webserver_config.py
+logs/
+*.pid
+
+# --- Docker & LocalStack ---
+# If you mapped volumes locally
+postgres-data/
+localstack-data/
+.localstack/
+
+# --- Pytest ---
+.pytest_cache/
+.coverage
+htmlcov/
